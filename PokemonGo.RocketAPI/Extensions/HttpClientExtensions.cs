@@ -18,7 +18,7 @@ namespace PokemonGo.RocketAPI.Extensions
 
             while (response.Returns.Count == 0)
             {
-                await Task.Delay(2000);
+                await Task.Delay(500);
                 response = await PostProto<TRequest>(client, url, requestEnvelope);
             }
 
