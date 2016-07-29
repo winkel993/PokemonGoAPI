@@ -16,6 +16,12 @@ namespace PokemonGo.RocketAPI.Extensions
             Debug.WriteLine($"Requesting {typeof(TResponsePayload).Name}");
             var response = await PostProto<TRequest>(client, url, requestEnvelope);
 
+            while (response.Returns.Count == 0)
+            {
+                await Task.Delay(2000);
+                response = await PostProto<TRequest>(client, url, requestEnvelope);
+            }
+
             if (response.Returns.Count == 0)
                 throw new InvalidResponseException();
 
