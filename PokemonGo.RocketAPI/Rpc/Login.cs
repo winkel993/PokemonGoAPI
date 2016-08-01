@@ -11,6 +11,7 @@ using PokemonGo.RocketAPI.Helpers;
 using PokemonGo.RocketAPI.Login;
 using POGOProtos.Networking.Requests;
 using POGOProtos.Networking.Requests.Messages;
+using System.Net;
 
 namespace PokemonGo.RocketAPI.Rpc
 {
@@ -23,11 +24,11 @@ namespace PokemonGo.RocketAPI.Rpc
         {
         }
 
-        public async Task DoGoogleLogin(string username,string password)
+        public async Task DoGoogleLogin(string username,string password, IWebProxy proxy)
         {
             _client.AuthType = AuthType.Google;
 
-            _client.AuthToken = GoogleLoginGPSOAuth.DoLogin(username, password);
+            _client.AuthToken = GoogleLoginGPSOAuth.DoLogin(username, password, proxy);
             await SetServer();
 
             /*
@@ -57,7 +58,7 @@ namespace PokemonGo.RocketAPI.Rpc
             */
         }
 
-        public async Task DoPtcLogin(string username, string password)
+        public async Task DoPtcLogin(string username, string password, IWebProxy proxy)
         {
             _client.AuthToken = await PtcLogin.GetAccessToken(username, password);
             _client.AuthType = AuthType.Ptc;

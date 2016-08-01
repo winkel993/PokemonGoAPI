@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 using DankMemes.GPSOAuthSharp;
 using Newtonsoft.Json;
 using PokemonGo.RocketAPI.Exceptions;
+using System.Net;
 
 namespace PokemonGo.RocketAPI.Login
 {
     public static class GoogleLoginGPSOAuth
     {
-        public static string DoLogin(string username, string password)
+        public static string DoLogin(string username, string password, IWebProxy proxy)
         {
-            GPSOAuthClient client = new GPSOAuthClient(username, password);
+            GPSOAuthClient client = new GPSOAuthClient(username, password, proxy);
             Dictionary<string, string> response = client.PerformMasterLogin();
             
             if(response.ContainsKey("Error"))
