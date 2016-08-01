@@ -24,11 +24,11 @@ namespace PokemonGo.RocketAPI.Rpc
         {
         }
 
-        public async Task DoGoogleLogin(string username,string password)
+        public async Task DoGoogleLogin(string username,string password, IWebProxy prox)
         {
             _client.AuthType = AuthType.Google;
 
-            _client.AuthToken = GoogleLoginGPSOAuth.DoLogin(username, password);
+            _client.AuthToken = GoogleLoginGPSOAuth.DoLogin(username, password, prox);
             await SetServer();
 
             /*
