@@ -11,14 +11,21 @@ namespace PokemonGo.RocketAPI.HttpClient
 {
     public class PokemonHttpClient : System.Net.Http.HttpClient
     {
-        private static readonly HttpClientHandler Handler = new HttpClientHandler
+        private static HttpClientHandler Handler(IWebProxy proxy)
         {
-            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-            AllowAutoRedirect = false
-        };
+            return new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                AllowAutoRedirect = false,
+                Proxy = proxy
+            };
+        }
 
-        public PokemonHttpClient() : base(new RetryHandler(Handler))
+        private static IWebProxy proxy = null;
+
+        public PokemonHttpClient(IWebProxy proxy) : base(new RetryHandler(Handler(proxy)))
         {
+            
             DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Niantic App");
             DefaultRequestHeaders.ExpectContinue = false;
             DefaultRequestHeaders.TryAddWithoutValidation("Connection", "keep-alive");

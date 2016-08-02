@@ -32,6 +32,7 @@ namespace PokemonGo.RocketAPI
         public IApiFailureStrategy ApiFailure { get; set; }
         public ISettings Settings { get; }
         public string AuthToken { get; set; }
+        private IWebProxy proxy { get; set; }
 
         public double CurrentLatitude { get; internal set; }
         public double CurrentLongitude { get; internal set; }
@@ -39,11 +40,17 @@ namespace PokemonGo.RocketAPI
 
         public AuthType AuthType { get; set; } = AuthType.Google;
 
-        internal readonly PokemonHttpClient PokemonHttpClient = new PokemonHttpClient();
+        internal PokemonHttpClient PokemonHttpClient
+        {
+            get
+            {
+                return new PokemonHttpClient(proxy);
+            }
+        }
         internal string ApiUrl { get; set; }
         internal AuthTicket AuthTicket { get; set; }
 
-        public Client(ISettings settings)
+        public Client(ISettings settings, IWebProxy proxy)
         {
             Settings = settings;
 
