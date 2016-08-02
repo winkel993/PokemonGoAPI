@@ -21,8 +21,6 @@ namespace PokemonGo.RocketAPI.HttpClient
             };
         }
 
-        private static IWebProxy proxy = null;
-
         public PokemonHttpClient(IWebProxy proxy) : base(new RetryHandler(Handler(proxy)))
         {
             

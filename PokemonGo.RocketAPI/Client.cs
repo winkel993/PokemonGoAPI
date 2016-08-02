@@ -32,7 +32,26 @@ namespace PokemonGo.RocketAPI
         public IApiFailureStrategy ApiFailure { get; set; }
         public ISettings Settings { get; }
         public string AuthToken { get; set; }
-        private IWebProxy proxy { get; set; }
+        private IWebProxy proxy
+        {
+            get
+            {
+                if (Settings.UseProxy)
+                {
+                    NetworkCredential proxyCreds = new NetworkCredential(
+                        Settings.ProxyLogin,
+                        Settings.ProxyPass
+                    );
+                    WebProxy prox = new WebProxy(Settings.ProxyUri)
+                    {
+                        UseDefaultCredentials = false,
+                        Credentials = proxyCreds,
+                    };
+                    return prox;
+                }
+                return null;
+            }
+        }
 
         public double CurrentLatitude { get; internal set; }
         public double CurrentLongitude { get; internal set; }
@@ -50,9 +69,10 @@ namespace PokemonGo.RocketAPI
         internal string ApiUrl { get; set; }
         internal AuthTicket AuthTicket { get; set; }
 
-        public Client(ISettings settings, IWebProxy proxy)
+        public Client(ISettings settings)
         {
             Settings = settings;
+
 
             Login = new Rpc.Login(this);
             Player = new Rpc.Player(this);
