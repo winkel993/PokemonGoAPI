@@ -28,6 +28,7 @@ namespace PokemonGo.RocketAPI
         public Rpc.Fort Fort;
         public Rpc.Encounter Encounter;
         public Rpc.Misc Misc;
+        public Random rnd = new Random();
 
         public IApiFailureStrategy ApiFailure { get; set; }
         public ISettings Settings { get; }
