@@ -53,25 +53,25 @@ namespace PokemonGo.RocketAPI.Helpers
 
         private Unknown6 GenerateSignature(IEnumerable<IMessage> requests)
         {
-            var gyroNextZ = RandomDevice.NextInRange(5.8125, 10.125); //9,80665
-            var gyroNextX = RandomDevice.NextInRange(-0.513123, 0.61231567); //Considering we handle phone only in 2 directions
-            var gyroNextY = Math.Sqrt(96.16744225D - gyroNextZ * gyroNextZ) * ((gyroNextZ > 9.8) ? -1 : 1);
+            var accelNextZ = RandomDevice.NextInRange(5.8125, 10.125); //9,80665
+            var accelNextX = RandomDevice.NextInRange(-0.513123, 0.61231567); //Considering we handle phone only in 2 directions
+            var accelNextY = Math.Sqrt(96.16744225D - accelNextZ * accelNextZ) * ((accelNextZ > 9.8) ? -1 : 1);
             var sig = new Signature
             {
                 TimestampSinceStart = (ulong) InternalWatch.ElapsedMilliseconds,
                 Timestamp = (ulong) DateTime.UtcNow.ToUnixTime(),
                 SensorInfo = new Signature.Types.SensorInfo()
                 {
-                    AccelNormalizedZ = gyroNextZ,
-                    AccelNormalizedX = gyroNextX,
-                    AccelNormalizedY = gyroNextY,
+                    AccelNormalizedZ = accelNextZ,
+                    AccelNormalizedX = accelNextX,
+                    AccelNormalizedY = accelNextY,
                     TimestampSnapshot = (ulong) InternalWatch.ElapsedMilliseconds - 230,
-                    MagnetometerX = gyroNextX * 10,
-                    MagnetometerY = -20  + -20 * gyroNextY / 9.8065,
-                    MagnetometerZ = -40 * gyroNextZ / 9.8065,
-                    AngleNormalizedX = Math.Acos(gyroNextX / 9.8065),
-                    AngleNormalizedY = Math.Acos(gyroNextY / 9.8065),
-                    AngleNormalizedZ = Math.Acos(gyroNextZ / 9.8065),
+                    MagnetometerX = accelNextX * 10,
+                    MagnetometerY = -20  + -20 * accelNextY / 9.8065,
+                    MagnetometerZ = -40 * accelNextZ / 9.8065,
+                    AngleNormalizedX = Math.Acos(accelNextX / 9.8065),
+                    AngleNormalizedY = Math.Acos(accelNextY / 9.8065),
+                    AngleNormalizedZ = Math.Acos(accelNextZ / 9.8065),
                     AccelRawX = RandomDevice.NextInRange(-0.005, 0.005),
                     AccelRawY = RandomDevice.NextInRange(0.5, 1),
                     AccelRawZ = RandomDevice.NextInRange(-0.05, 0.05),
