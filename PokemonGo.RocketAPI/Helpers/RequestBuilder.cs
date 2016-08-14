@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PokemonGo.RocketAPI.Extensions;
 // ReSharper disable RedundantAssignment
+using System.Security.Cryptography;
 
 namespace PokemonGo.RocketAPI.Helpers
 {
@@ -139,6 +140,15 @@ namespace PokemonGo.RocketAPI.Helpers
             };
             return val;
         }
+
+        private static byte[] GetURandom(int size)
+        {
+            var rng = new RNGCryptoServiceProvider();
+            var buffer = new byte[size];
+            rng.GetBytes(buffer);
+            return buffer;
+        }
+
         private byte[] Encrypt(byte[] bytes)
         {
             var outputLength = 32 + bytes.Length + (256 - (bytes.Length % 256));
@@ -147,10 +157,17 @@ namespace PokemonGo.RocketAPI.Helpers
             FillMemory(ptr, (uint)outputLength, 0);
             FillMemory(ptrOutput, (uint)outputLength, 0);
             Marshal.Copy(bytes, 0, ptr, bytes.Length);
+
+            var iv = GetURandom(32);
+            var iv_ptr = Marshal.AllocHGlobal(iv.Length);
+            Marshal.Copy(iv, 0, iv_ptr, iv.Length);
+
             try
             {
                 var outputSize = outputLength;
-                _encryptNative(ptr, bytes.Length, new byte[32], 32, ptrOutput, out outputSize);
+                //_encryptNative(ptr, bytes.Length, new byte[32], 32, ptrOutput, out outputSize);
+                //_encryptNative(ptr, bytes.Length, iv_ptr, iv.Length, ptrOutput, out outputSize);
+                _encryptNative(ptr, bytes.Length, iv_ptr, iv.Length, ptrOutput, out outputSize);
             }
             catch (Exception ex)
             {
@@ -176,7 +193,11 @@ namespace PokemonGo.RocketAPI.Helpers
                 return Marshal.GetDelegateForFunctionPointer(functionAddress, typeof(T));
             }
         }
-        private delegate int EncryptDelegate(IntPtr arr, int length, byte[] iv, int ivsize, IntPtr output, out int outputSize);
+        //private delegate int EncryptDelegate(IntPtr arr, int length, byte[] iv, int ivsize, IntPtr output, out int outputSize);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate int EncryptDelegate(IntPtr arr, int length, IntPtr iv, int ivsize, IntPtr output, out int outputSize);
+        //private unsafe delegate int EncryptDelegate(IntPtr arr, int length, byte[] iv, int ivsize, IntPtr output, out int outputSize);
+
 
         private static EncryptDelegate _encryptNative;
 
@@ -248,11 +269,11 @@ namespace PokemonGo.RocketAPI.Helpers
 
         public static double GenRandom(double num)
         {
-                var randomFactor = 0.3f;
-                var randomMin = (num * (1 - randomFactor));
-                var randomMax = (num * (1 + randomFactor));
-                var randomizedDelay = RandomDevice.NextDouble() * (randomMax - randomMin) + randomMin;
-                return randomizedDelay;
+            var randomFactor = 0.3f;
+            var randomMin = (num * (1 - randomFactor));
+            var randomMax = (num * (1 + randomFactor));
+            var randomizedDelay = RandomDevice.NextDouble() * (randomMax - randomMin) + randomMin;
+            return randomizedDelay;
         }
     }
 }
