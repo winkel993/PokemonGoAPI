@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using PokemonGo.RocketAPI.Enums;
 using PokemonGo.RocketAPI.Exceptions;
 using PokemonGo.RocketAPI.Extensions;
-using PokemonGo.RocketAPI.Helpers;
 using PokemonGo.RocketAPI.Login;
 using POGOProtos.Networking.Requests;
 using POGOProtos.Networking.Requests.Messages;
@@ -31,10 +27,9 @@ namespace PokemonGo.RocketAPI.Rpc
             WebProxy prox = null;
             if (settings.UseProxy)
             {
-                NetworkCredential proxyCreds = new NetworkCredential(
-                            settings.ProxyLogin,
-                            settings.ProxyPass
-                        );
+                NetworkCredential proxyCreds = null;
+                if (settings.ProxyLogin != "")
+                    proxyCreds = new NetworkCredential(settings.ProxyLogin, settings.ProxyPass);
                 prox = new WebProxy(settings.ProxyUri)
                 {
                     UseDefaultCredentials = false,
