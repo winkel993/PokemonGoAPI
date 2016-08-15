@@ -39,10 +39,9 @@ namespace PokemonGo.RocketAPI
             {
                 if (Settings.UseProxy)
                 {
-                    NetworkCredential proxyCreds = new NetworkCredential(
-                        Settings.ProxyLogin,
-                        Settings.ProxyPass
-                    );
+                    NetworkCredential proxyCreds = null;
+                    if (Settings.ProxyLogin != "")
+                        proxyCreds = new NetworkCredential(Settings.ProxyLogin, Settings.ProxyPass);
                     WebProxy prox = new WebProxy(Settings.ProxyUri)
                     {
                         UseDefaultCredentials = false,
