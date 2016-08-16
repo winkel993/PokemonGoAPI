@@ -37,19 +37,16 @@ namespace PokemonGo.RocketAPI
         {
             get
             {
-                if (Settings.UseProxy)
+                if (!Settings.UseProxy) return null;
+                NetworkCredential proxyCreds = null;
+                if (Settings.ProxyLogin != "")
+                    proxyCreds = new NetworkCredential(Settings.ProxyLogin, Settings.ProxyPass);
+                var prox = new WebProxy(Settings.ProxyUri)
                 {
-                    NetworkCredential proxyCreds = null;
-                    if (Settings.ProxyLogin != "")
-                        proxyCreds = new NetworkCredential(Settings.ProxyLogin, Settings.ProxyPass);
-                    WebProxy prox = new WebProxy(Settings.ProxyUri)
-                    {
-                        UseDefaultCredentials = false,
-                        Credentials = proxyCreds,
-                    };
-                    return prox;
-                }
-                return null;
+                    UseDefaultCredentials = false,
+                    Credentials = proxyCreds,
+                };
+                return prox;
             }
         }
 
@@ -59,13 +56,7 @@ namespace PokemonGo.RocketAPI
 
         public AuthType AuthType => Settings.AuthType;
 
-        internal PokemonHttpClient PokemonHttpClient
-        {
-            get
-            {
-                return new PokemonHttpClient(proxy);
-            }
-        }
+        internal PokemonHttpClient PokemonHttpClient => new PokemonHttpClient(proxy);
         internal string ApiUrl { get; set; }
         internal AuthTicket AuthTicket { get; set; }
 
