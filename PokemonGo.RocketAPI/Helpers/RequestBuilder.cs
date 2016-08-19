@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using PokemonGo.RocketAPI.Extensions;
 // ReSharper disable RedundantAssignment
 using System.Security.Cryptography;
@@ -40,12 +41,20 @@ namespace PokemonGo.RocketAPI.Helpers
             if (_encryptNative != null) return;
             if (IntPtr.Size == 4)
             {
+                _encryptNativeInit = (EncryptInitDelegate)
+                    FunctionLoader.LoadFunction<EncryptInitDelegate>(
+                        @"Resources\encrypt32.dll", "MobBot");
+
                 _encryptNative = (EncryptDelegate)
                     FunctionLoader.LoadFunction<EncryptDelegate>(
                         @"Resources\encrypt32.dll", "encryptMobBot");
             }
             else
             {
+                _encryptNativeInit = (EncryptInitDelegate)
+                    FunctionLoader.LoadFunction<EncryptInitDelegate>(
+                        @"Resources\encrypt64.dll", "MobBot");
+
                 _encryptNative = (EncryptDelegate)
                     FunctionLoader.LoadFunction<EncryptDelegate>(
                         @"Resources\encrypt64.dll", "encryptMobBot");
@@ -151,7 +160,7 @@ namespace PokemonGo.RocketAPI.Helpers
 
         private byte[] Encrypt(byte[] bytes)
         {
-            var outputLength = 32 + bytes.Length + (256 - bytes.Length % 256);
+            var outputLength = 32 + bytes.Length + (256 - (bytes.Length % 256));
             var ptr = Marshal.AllocHGlobal(outputLength);
             var ptrOutput = Marshal.AllocHGlobal(outputLength);
             FillMemory(ptr, (uint)outputLength, 0);
@@ -159,8 +168,24 @@ namespace PokemonGo.RocketAPI.Helpers
             Marshal.Copy(bytes, 0, ptr, bytes.Length);
 
             var iv = GetURandom(32);
-            var ivPtr = Marshal.AllocHGlobal(iv.Length);
-            Marshal.Copy(iv, 0, ivPtr, iv.Length);
+            var iv_ptr = Marshal.AllocHGlobal(iv.Length);
+            Marshal.Copy(iv, 0, iv_ptr, iv.Length);
+
+            var magic = Encoding.ASCII.GetBytes("We love PokeMobBot, They are the true gangstas, everyone else is just a poser!");
+            var magic_ptr = Marshal.AllocHGlobal(magic.Length);
+            Marshal.Copy(magic, 0, magic_ptr, magic.Length);
+
+            try
+            {
+                var outputSize = outputLength;
+                //Console.WriteLine("Testing Sign");
+                int res = _encryptNativeInit(magic_ptr);
+                //Console.WriteLine(res);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
             try
             {
@@ -168,7 +193,7 @@ namespace PokemonGo.RocketAPI.Helpers
                 //_encryptNative(ptr, bytes.Length, new byte[32], 32, ptrOutput, out outputSize);
                 //_encryptNative(ptr, bytes.Length, iv_ptr, iv.Length, ptrOutput, out outputSize);
                 //Console.WriteLine("Testing Encrypt");
-                _encryptNative(ptr, bytes.Length, ivPtr, iv.Length, ptrOutput, out outputSize);
+                int res = _encryptNative(ptr, bytes.Length, iv_ptr, iv.Length, ptrOutput, out outputSize);
                 //Console.WriteLine(res);
             }
             catch (Exception ex)
@@ -197,9 +222,12 @@ namespace PokemonGo.RocketAPI.Helpers
         }
         //private delegate int EncryptDelegate(IntPtr arr, int length, byte[] iv, int ivsize, IntPtr output, out int outputSize);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate int EncryptDelegate(IntPtr arr, int length, IntPtr iv, int ivsize, IntPtr output, out int outputSize);
+        private unsafe delegate int EncryptDelegate(IntPtr arr, int length, IntPtr iv, int ivsize, IntPtr output, out int outputSize);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate int EncryptInitDelegate(IntPtr input);
         //private unsafe delegate int EncryptDelegate(IntPtr arr, int length, byte[] iv, int ivsize, IntPtr output, out int outputSize);
 
+        private static EncryptInitDelegate _encryptNativeInit;
         private static EncryptDelegate _encryptNative;
 
         //[DllImport("Resources/encrypt.dll", EntryPoint = "encrypt", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl)]
