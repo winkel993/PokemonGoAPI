@@ -42,13 +42,13 @@ namespace PokemonGo.RocketAPI.Helpers
             {
                 _encryptNative = (EncryptDelegate)
                     FunctionLoader.LoadFunction<EncryptDelegate>(
-                        @"Resources\encrypt32.dll", "encrypt");
+                        @"Resources\encrypt32.dll", "encryptMobBot");
             }
             else
             {
                 _encryptNative = (EncryptDelegate)
                     FunctionLoader.LoadFunction<EncryptDelegate>(
-                        @"Resources\encrypt64.dll", "encrypt");
+                        @"Resources\encrypt64.dll", "encryptMobBot");
             }
         }
 
@@ -59,16 +59,16 @@ namespace PokemonGo.RocketAPI.Helpers
             var accelNextY = Math.Sqrt(96.16744225D - accelNextZ * accelNextZ) * ((accelNextZ > 9.8) ? -1 : 1);
             var sig = new Signature
             {
-                TimestampSinceStart = (ulong) InternalWatch.ElapsedMilliseconds,
-                Timestamp = (ulong) DateTime.UtcNow.ToUnixTime(),
+                TimestampSinceStart = (ulong)InternalWatch.ElapsedMilliseconds,
+                Timestamp = (ulong)DateTime.UtcNow.ToUnixTime(),
                 SensorInfo = new Signature.Types.SensorInfo()
                 {
                     AccelNormalizedZ = accelNextZ,
                     AccelNormalizedX = accelNextX,
                     AccelNormalizedY = accelNextY,
-                    TimestampSnapshot = (ulong) InternalWatch.ElapsedMilliseconds - 230,
+                    TimestampSnapshot = (ulong)InternalWatch.ElapsedMilliseconds - 230,
                     MagnetometerX = accelNextX * 10,
-                    MagnetometerY = -20  + -20 * accelNextY / 9.8065,
+                    MagnetometerY = -20 + -20 * accelNextY / 9.8065,
                     MagnetometerZ = -40 * accelNextZ / 9.8065,
                     AngleNormalizedX = Math.Acos(accelNextX / 9.8065),
                     AngleNormalizedY = Math.Acos(accelNextY / 9.8065),
@@ -136,7 +136,7 @@ namespace PokemonGo.RocketAPI.Helpers
             var val = new Unknown6
             {
                 RequestType = 6,
-                Unknown2 = new Unknown6.Types.Unknown2 {Unknown1 = ByteString.CopyFrom(Encrypt(sig.ToByteArray()))}
+                Unknown2 = new Unknown6.Types.Unknown2 { Unknown1 = ByteString.CopyFrom(Encrypt(sig.ToByteArray())) }
             };
             return val;
         }
@@ -151,7 +151,7 @@ namespace PokemonGo.RocketAPI.Helpers
 
         private byte[] Encrypt(byte[] bytes)
         {
-            var outputLength = 32 + bytes.Length + (256 - (bytes.Length % 256));
+            var outputLength = 32 + bytes.Length + (256 - bytes.Length % 256);
             var ptr = Marshal.AllocHGlobal(outputLength);
             var ptrOutput = Marshal.AllocHGlobal(outputLength);
             FillMemory(ptr, (uint)outputLength, 0);
@@ -159,15 +159,17 @@ namespace PokemonGo.RocketAPI.Helpers
             Marshal.Copy(bytes, 0, ptr, bytes.Length);
 
             var iv = GetURandom(32);
-            var iv_ptr = Marshal.AllocHGlobal(iv.Length);
-            Marshal.Copy(iv, 0, iv_ptr, iv.Length);
+            var ivPtr = Marshal.AllocHGlobal(iv.Length);
+            Marshal.Copy(iv, 0, ivPtr, iv.Length);
 
             try
             {
                 var outputSize = outputLength;
                 //_encryptNative(ptr, bytes.Length, new byte[32], 32, ptrOutput, out outputSize);
                 //_encryptNative(ptr, bytes.Length, iv_ptr, iv.Length, ptrOutput, out outputSize);
-                _encryptNative(ptr, bytes.Length, iv_ptr, iv.Length, ptrOutput, out outputSize);
+                //Console.WriteLine("Testing Encrypt");
+                _encryptNative(ptr, bytes.Length, ivPtr, iv.Length, ptrOutput, out outputSize);
+                //Console.WriteLine(res);
             }
             catch (Exception ex)
             {
@@ -178,7 +180,7 @@ namespace PokemonGo.RocketAPI.Helpers
             return output;
         }
 
-        static class FunctionLoader
+        private static class FunctionLoader
         {
             [DllImport("Kernel32.dll")]
             private static extern IntPtr LoadLibrary(string path);
@@ -195,9 +197,8 @@ namespace PokemonGo.RocketAPI.Helpers
         }
         //private delegate int EncryptDelegate(IntPtr arr, int length, byte[] iv, int ivsize, IntPtr output, out int outputSize);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate int EncryptDelegate(IntPtr arr, int length, IntPtr iv, int ivsize, IntPtr output, out int outputSize);
+        private delegate int EncryptDelegate(IntPtr arr, int length, IntPtr iv, int ivsize, IntPtr output, out int outputSize);
         //private unsafe delegate int EncryptDelegate(IntPtr arr, int length, byte[] iv, int ivsize, IntPtr output, out int outputSize);
-
 
         private static EncryptDelegate _encryptNative;
 
