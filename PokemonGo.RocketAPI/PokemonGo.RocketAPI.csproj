@@ -118,7 +118,6 @@
     <Compile Include="Exceptions\InvalidResponseException.cs" />
     <Compile Include="Exceptions\PTCOfflineException.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
-    <Compile Include="Helpers\HttpClientHelper.cs" />
     <Compile Include="Helpers\JsonHelper.cs" />
     <Compile Include="Helpers\RetryHandler.cs" />
     <Compile Include="Helpers\S2Helper.cs" />

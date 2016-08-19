@@ -95,7 +95,7 @@ namespace PokemonGo.RocketAPI.Rpc
             return await PostProtoPayload<Request, UseItemPotionResponse>(RequestType.UseItemPotion, message);
         }
 
-        public async Task<UseItemEggIncubatorResponse> UseItemRevive(ItemId itemId, ulong pokemonId)
+  		public async Task<UseItemReviveResponse> UseItemRevive(ItemId itemId, ulong pokemonId)
         {
             var message = new UseItemReviveMessage()
             {
@@ -103,7 +103,7 @@ namespace PokemonGo.RocketAPI.Rpc
                 PokemonId = pokemonId
             };
 
-            return await PostProtoPayload<Request, UseItemEggIncubatorResponse>(RequestType.UseItemEggIncubator, message);
+            return await PostProtoPayload<Request, UseItemReviveResponse>(RequestType.UseItemRevive, message);
         }
 
         public async Task<UseIncenseResponse> UseIncense(ItemId incenseType)
