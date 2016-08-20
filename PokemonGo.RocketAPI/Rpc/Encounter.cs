@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using POGOProtos.Enums;
 using POGOProtos.Inventory.Item;
 using POGOProtos.Networking.Requests;
@@ -40,7 +36,7 @@ namespace PokemonGo.RocketAPI.Rpc
             return await PostProtoPayload<Request, UseItemCaptureResponse>(RequestType.UseItemCapture, message);
         }
 
-        public async Task<CatchPokemonResponse> CatchPokemon(ulong encounterId, string spawnPointGuid, ItemId pokeballItemId, double normalizedRecticleSize = 1.950, double spinModifier = 1, double normalizedHitPos = 1)
+        public async Task<CatchPokemonResponse> CatchPokemon(ulong encounterId, string spawnPointGuid, ItemId pokeballItemId, double normalizedRecticleSize = 1.950, double spinModifier = 1, double normalizedHitPos = 1, bool hitPokemon = true)
         {
             var message = new CatchPokemonMessage
             {
@@ -52,6 +48,15 @@ namespace PokemonGo.RocketAPI.Rpc
                 SpinModifier = spinModifier,
                 NormalizedHitPosition = normalizedHitPos
             };
+
+            // when you miss a throw also set NormalizedHitPosition and SpinModifier to 0 (to exclude from message sent) plus set NormalizedReticleSize = 1
+            if (!hitPokemon)
+            {
+                message.HitPokemon = false;
+                message.SpinModifier = 0;
+                message.NormalizedHitPosition = 0;
+                message.NormalizedReticleSize = 1;
+            }
             
             return await PostProtoPayload<Request, CatchPokemonResponse>(RequestType.CatchPokemon, message);
         }

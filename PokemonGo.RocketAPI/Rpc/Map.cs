@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using PokemonGo.RocketAPI.Extensions;
@@ -18,7 +15,7 @@ namespace PokemonGo.RocketAPI.Rpc
         {
         }
 
-        public async Task<GetMapObjectsResponse> GetMapObjects()
+		public async Task<GetMapObjectsResponse> GetMapObjects()
         {
             #region Messages
 
@@ -69,7 +66,7 @@ namespace PokemonGo.RocketAPI.Rpc
             return await PostProtoPayload<Request, GetMapObjectsResponse>(request);
         }
 
-        public async Task<Tuple<GetMapObjectsResponse, GetHatchedEggsResponse, GetInventoryResponse, CheckAwardedBadgesResponse, DownloadSettingsResponse>> GetMapObjectsByTypes()
+        public async Task<Tuple<GetMapObjectsResponse, GetHatchedEggsResponse, GetInventoryResponse, CheckAwardedBadgesResponse, DownloadSettingsResponse>> GetMapObjectsTuple()
         {
             #region Messages
 
